@@ -202,6 +202,130 @@ int main() {
       'En C, l’instruction int age = 20 doit se terminer par un point-virgule.',
     skill: 'Syntaxe',
   },
+
+  {
+    id: 'function-01',
+    type: 'Lire une fonction',
+    category: 'Fonctions',
+    title: 'Quelle valeur est renvoyée ?',
+    code: `int doubleValeur(int n) {
+    return n * 2;
+}
+
+printf("%d", doubleValeur(6));`,
+    question: 'Que va afficher cet appel de fonction ?',
+    options: [
+      { id: 'a', text: '6' },
+      { id: 'b', text: '8' },
+      { id: 'c', text: '12' },
+      { id: 'd', text: 'Une adresse mémoire' },
+    ],
+    correct: 'c',
+    explanation: 'L’argument n reçoit 6, puis la fonction renvoie 6 × 2, soit 12.',
+    skill: 'Paramètres et return',
+  },
+
+  {
+    id: 'function-02',
+    type: 'Choisir le prototype',
+    category: 'Fonctions',
+    title: 'Déclarer une fonction correctement',
+    code: `/* La fonction calcule la somme de deux entiers. */`,
+    question: 'Quel prototype correspond à une fonction somme qui reçoit deux int et renvoie un int ?',
+    options: [
+      { id: 'a', text: 'int somme(int a, int b);' },
+      { id: 'b', text: 'somme(int, int) = int;' },
+      { id: 'c', text: 'return somme(int a, int b);' },
+      { id: 'd', text: 'int somme = (int a, int b);' },
+    ],
+    correct: 'a',
+    explanation: 'Un prototype précise le type de retour, le nom de la fonction et les types de ses paramètres.',
+    skill: 'Prototypes',
+  },
+
+  {
+    id: 'pointer-01',
+    type: 'Suivre un pointeur',
+    category: 'Pointeurs',
+    title: 'Quelle est la nouvelle valeur de x ?',
+    code: `int x = 5;
+int *p = &x;
+
+*p = *p + 3;
+printf("%d", x);`,
+    question: 'Que va afficher le programme ?',
+    options: [
+      { id: 'a', text: '5' },
+      { id: 'b', text: '8' },
+      { id: 'c', text: '3' },
+      { id: 'd', text: 'L’adresse de x' },
+    ],
+    correct: 'b',
+    explanation: 'p contient l’adresse de x. Écrire dans *p modifie donc directement x : 5 + 3 = 8.',
+    skill: 'Déréférencement',
+  },
+
+  {
+    id: 'pointer-02',
+    type: 'Identifier un opérateur',
+    category: 'Pointeurs',
+    title: 'Obtenir l’adresse d’une variable',
+    code: `int age = 18;`,
+    question: 'Quelle expression représente l’adresse de age ?',
+    options: [
+      { id: 'a', text: 'age' },
+      { id: 'b', text: '*age' },
+      { id: 'c', text: '&age' },
+      { id: 'd', text: 'age&' },
+    ],
+    correct: 'c',
+    explanation: 'L’opérateur unaire & permet d’obtenir l’adresse mémoire d’une variable.',
+    skill: 'Adresses mémoire',
+  },
+
+  {
+    id: 'storage-01',
+    type: 'Portée des variables',
+    category: 'Stockage',
+    title: 'Où une variable locale est-elle visible ?',
+    code: `void afficher(void) {
+    int nombre = 4;
+    printf("%d", nombre);
+}`,
+    question: 'Dans quel endroit nombre peut-elle être utilisée ?',
+    options: [
+      { id: 'a', text: 'Uniquement dans le bloc de afficher.' },
+      { id: 'b', text: 'Dans toutes les fonctions du programme.' },
+      { id: 'c', text: 'Uniquement après return 0.' },
+      { id: 'd', text: 'Dans tous les fichiers C.' },
+    ],
+    correct: 'a',
+    explanation: 'Une variable locale est visible uniquement à partir de sa déclaration, à l’intérieur de son bloc.',
+    skill: 'Portée locale',
+  },
+
+  {
+    id: 'file-01',
+    type: 'Gérer un fichier',
+    category: 'Fichiers',
+    title: 'Fermer un fichier',
+    code: `FILE *f = fopen("notes.txt", "w");
+
+if (f != NULL) {
+    fprintf(f, "20\\n");
+    /* instruction manquante */
+}`,
+    question: 'Quelle instruction doit remplacer le commentaire ?',
+    options: [
+      { id: 'a', text: 'close(f);' },
+      { id: 'b', text: 'fclose(f);' },
+      { id: 'c', text: 'fopen(f);' },
+      { id: 'd', text: 'return f;' },
+    ],
+    correct: 'b',
+    explanation: 'Après une ouverture réussie, fclose(f) libère la ressource et termine correctement l’écriture.',
+    skill: 'fopen et fclose',
+  },
 ]
 
 function PracticePage({

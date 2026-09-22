@@ -15,6 +15,7 @@ import PracticePage from './PracticePage'
 import { courseModules } from './data/course'
 import ControlLessonPage from './ControlLessonPage'
 import CompositeLessonPage from './CompositeLessonPage'
+import GenericLessonPage from './GenericLessonPage'
 
 import './App.css'
 
@@ -50,7 +51,11 @@ const navigationItems = [
    LEÇONS ACTUELLEMENT DÉVELOPPÉES
    ========================================================= */
 
-const implementedLessonIds = [
+const implementedLessonIds = courseModules.flatMap(
+  (module) => module.lessons.map((lesson) => lesson.id),
+)
+
+const specialisedLessonIds = [
   'introduction-c',
   'variables-types',
   'operateurs',
@@ -60,9 +65,9 @@ const implementedLessonIds = [
   'if',
   'switch',
   'tableaux',
-'tableaux-2d',
-'structures',
-'enum'
+  'tableaux-2d',
+  'structures',
+  'enum',
 ]
 
 /* =========================================================
@@ -377,6 +382,9 @@ const COMPLETED_LESSONS_KEY =
 const SOLVED_EXERCISES_KEY =
   'c-mastery-solved-exercises'
 
+const PREFERENCES_KEY =
+  'c-mastery-preferences'
+
 /* =========================================================
    APPLICATION
    ========================================================= */
@@ -442,6 +450,67 @@ function App() {
       }
     })
 
+  const [preferences, setPreferences] =
+    useState(() => {
+      try {
+        const savedPreferences = localStorage.getItem(PREFERENCES_KEY)
+        const parsedPreferences = savedPreferences
+          ? JSON.parse(savedPreferences)
+          : null
+
+        return {
+          firstName: typeof parsedPreferences?.firstName === 'string'
+            ? parsedPreferences.firstName
+            : typeof parsedPreferences?.name === 'string'
+              ? parsedPreferences.name
+            : '',
+          lastName: typeof parsedPreferences?.lastName === 'string'
+            ? parsedPreferences.lastName
+            : '',
+          theme: parsedPreferences?.theme === 'dark'
+            ? 'dark'
+            : 'light',
+          dailyGoal: [10, 20, 30, 45].includes(parsedPreferences?.dailyGoal)
+            ? parsedPreferences.dailyGoal
+            : 20,
+        }
+      } catch {
+        return {
+          firstName: '',
+          lastName: '',
+          theme: 'light',
+          dailyGoal: 20,
+        }
+      }
+    })
+
+  const [profileDraft, setProfileDraft] =
+    useState(() => ({
+      firstName: '',
+      lastName: '',
+    }))
+
+  const profileIsComplete =
+    Boolean(preferences.firstName.trim()) &&
+    Boolean(preferences.lastName.trim())
+
+  const saveProfile = (event) => {
+    event.preventDefault()
+
+    const firstName = profileDraft.firstName.trim()
+    const lastName = profileDraft.lastName.trim()
+
+    if (!firstName || !lastName) {
+      return
+    }
+
+    setPreferences((current) => ({
+      ...current,
+      firstName,
+      lastName,
+    }))
+  }
+
   /* =======================================================
      SAUVEGARDE DES LEÇONS
      ======================================================= */
@@ -463,6 +532,13 @@ function App() {
       JSON.stringify(solvedExercises),
     )
   }, [solvedExercises])
+
+  useEffect(() => {
+    localStorage.setItem(
+      PREFERENCES_KEY,
+      JSON.stringify(preferences),
+    )
+  }, [preferences])
 
   /* =======================================================
      ÉTAT D'UNE LEÇON
@@ -517,27 +593,9 @@ function App() {
       return false
     }
 
-    if (!module.prerequisite) {
-      return true
-    }
-
-    const prerequisiteModule =
-      getModuleById(module.prerequisite)
-
-    if (!prerequisiteModule) {
-      return false
-    }
-
-    const prerequisiteLessons =
-      getImplementedLessons(prerequisiteModule)
-
-    if (prerequisiteLessons.length === 0) {
-      return false
-    }
-
-    return prerequisiteLessons.every((lesson) =>
-      completedLessons.includes(lesson.id),
-    )
+    // Tous les cours sont publiés : les prérequis restent des
+    // recommandations pédagogiques, sans empêcher la navigation.
+    return true
   }
 
   /* =======================================================
@@ -719,7 +777,7 @@ function App() {
      ======================================================= */
 
   return (
-    <div className="app">
+    <div className={`app theme-${preferences.theme}`}>
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-icon">
@@ -931,6 +989,7 @@ function App() {
           {activePage === 'lesson' &&
   ['for', 'if', 'switch'].includes(activeLesson) && (
     <ControlLessonPage
+      key={activeLesson}
       lessonId={activeLesson}
       onBack={() =>
         navigateTo('learn')
@@ -948,12 +1007,25 @@ function App() {
   {activePage === 'lesson' &&
   ['tableaux', 'tableaux-2d', 'structures', 'enum'].includes(activeLesson) && (
     <CompositeLessonPage
+      key={activeLesson}
       lessonId={activeLesson}
       onBack={() => navigateTo('learn')}
       onComplete={completeLesson}
       alreadyCompleted={isLessonCompleted(activeLesson)}
     />
   )}
+
+        {activePage === 'lesson' &&
+          activeLesson &&
+          !specialisedLessonIds.includes(activeLesson) && (
+            <GenericLessonPage
+              key={activeLesson}
+              lessonId={activeLesson}
+              onBack={() => navigateTo('learn')}
+              onComplete={completeLesson}
+              alreadyCompleted={isLessonCompleted(activeLesson)}
+            />
+          )}
 
         {activePage === 'practice' && (
           <PracticePage
@@ -993,9 +1065,51 @@ function App() {
             onResetProgress={
               resetProgress
             }
+            preferences={preferences}
+            onPreferencesChange={setPreferences}
           />
         )}
       </main>
+
+      {!profileIsComplete && (
+        <div className="profile-onboarding" role="dialog" aria-modal="true" aria-labelledby="profile-onboarding-title">
+          <form className="profile-onboarding-card" onSubmit={saveProfile}>
+            <div className="profile-onboarding-icon">C</div>
+            <p className="section-label">BIENVENUE DANS C-MASTERY</p>
+            <h2 id="profile-onboarding-title">Créons ton profil apprenant</h2>
+            <p>Indique ton prénom et ton nom pour personnaliser ton parcours. Ces données restent enregistrées uniquement sur cet appareil.</p>
+
+            <label>
+              <span>Prénom</span>
+              <input
+                type="text"
+                autoFocus
+                autoComplete="given-name"
+                value={profileDraft.firstName}
+                maxLength={32}
+                placeholder="Ex. Amina"
+                onChange={(event) => setProfileDraft((current) => ({ ...current, firstName: event.target.value }))}
+              />
+            </label>
+
+            <label>
+              <span>Nom</span>
+              <input
+                type="text"
+                autoComplete="family-name"
+                value={profileDraft.lastName}
+                maxLength={32}
+                placeholder="Ex. Diallo"
+                onChange={(event) => setProfileDraft((current) => ({ ...current, lastName: event.target.value }))}
+              />
+            </label>
+
+            <button type="submit" className="profile-onboarding-button" disabled={!profileDraft.firstName.trim() || !profileDraft.lastName.trim()}>
+              Commencer mon parcours <span>→</span>
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
@@ -1684,6 +1798,9 @@ function ExamPage({
   const totalQuestions =
     examQuestions.length
 
+  const estimatedDuration =
+    Math.max(10, totalQuestions * 2)
+
   const currentQuestion =
     examQuestions[currentQuestionIndex]
 
@@ -1796,24 +1913,12 @@ function ExamPage({
         100,
     )
 
-    let resultTitle =
-      'Sujet terminé.'
-
-    if (score === totalQuestions) {
-      resultTitle =
-        'Maîtrise complète.'
-    } else if (
-      score >=
-      Math.ceil(
-        totalQuestions * 0.7,
-      )
-    ) {
-      resultTitle =
-        'Bonne maîtrise des notions.'
-    } else {
-      resultTitle =
-        'Les notions doivent encore être renforcées.'
-    }
+    const resultTitle =
+      score === totalQuestions
+        ? 'Maîtrise complète.'
+        : score >= Math.ceil(totalQuestions * 0.7)
+          ? 'Bonne maîtrise des notions.'
+          : 'Les notions doivent encore être renforcées.'
 
     return (
       <>
@@ -2154,7 +2259,23 @@ function ExamPage({
 
           <article className="stat-card">
             <div className="stat-icon">
-              ✍️
+              ⏱️
+            </div>
+
+            <div>
+              <strong>
+                {estimatedDuration} min
+              </strong>
+
+              <span>
+                Durée conseillée
+              </span>
+            </div>
+          </article>
+
+          <article className="stat-card">
+            <div className="stat-icon">
+              🔒
             </div>
 
             <div>
@@ -2163,7 +2284,7 @@ function ExamPage({
               </strong>
 
               <span>
-                Correction avant la remise
+                Correction avant remise
               </span>
             </div>
           </article>
@@ -2690,7 +2811,16 @@ function ProgressPage({
 
 function SettingsPage({
   onResetProgress,
+  preferences,
+  onPreferencesChange,
 }) {
+  const updatePreference = (key, value) => {
+    onPreferencesChange((current) => ({
+      ...current,
+      [key]: value,
+    }))
+  }
+
   return (
     <>
       <header className="topbar">
@@ -2724,8 +2854,8 @@ function SettingsPage({
           </div>
         </div>
 
-        <div className="module-grid">
-          <article className="module-card">
+        <div className="settings-grid">
+          <article className="settings-card">
             <span className="module-number">
               PROFIL
             </span>
@@ -2734,18 +2864,36 @@ function SettingsPage({
               Profil apprenant
             </h4>
 
-            <p>
-              Le prénom et les informations
-              de progression pourront être
-              personnalisés ici.
-            </p>
+            <p>Personnalise l’accueil de ton espace d’apprentissage.</p>
 
-            <span className="module-status available">
-              Bientôt disponible
-            </span>
+            <label className="settings-field">
+              <span>Prénom ou pseudo</span>
+              <input
+                type="text"
+                value={preferences.firstName}
+                maxLength={32}
+                placeholder="Ex. Amina"
+                onChange={(event) =>
+                  updatePreference('firstName', event.target.value)
+                }
+              />
+            </label>
+
+            <label className="settings-field">
+              <span>Nom</span>
+              <input
+                type="text"
+                value={preferences.lastName}
+                maxLength={32}
+                placeholder="Ex. Diallo"
+                onChange={(event) =>
+                  updatePreference('lastName', event.target.value)
+                }
+              />
+            </label>
           </article>
 
-          <article className="module-card">
+          <article className="settings-card">
             <span className="module-number">
               APPARENCE
             </span>
@@ -2754,18 +2902,23 @@ function SettingsPage({
               Apparence
             </h4>
 
-            <p>
-              Les réglages de thème et
-              d'affichage seront ajoutés plus
-              tard.
-            </p>
+            <p>Choisis l’affichage le plus confortable pour tes révisions.</p>
 
-            <span className="module-status available">
-              Bientôt disponible
-            </span>
+            <div className="settings-choice-group" aria-label="Thème">
+              {['light', 'dark'].map((theme) => (
+                <button
+                  key={theme}
+                  type="button"
+                  className={preferences.theme === theme ? 'settings-choice active' : 'settings-choice'}
+                  onClick={() => updatePreference('theme', theme)}
+                >
+                  {theme === 'light' ? '☀ Clair' : '☾ Sombre'}
+                </button>
+              ))}
+            </div>
           </article>
 
-          <article className="module-card">
+          <article className="settings-card">
             <span className="module-number">
               APPRENTISSAGE
             </span>
@@ -2774,18 +2927,23 @@ function SettingsPage({
               Objectifs
             </h4>
 
-            <p>
-              La durée quotidienne et les
-              objectifs de progression seront
-              configurables.
-            </p>
+            <p>Définis une durée réaliste pour garder un rythme régulier.</p>
 
-            <span className="module-status available">
-              Bientôt disponible
-            </span>
+            <div className="settings-choice-group" aria-label="Objectif quotidien">
+              {[10, 20, 30, 45].map((minutes) => (
+                <button
+                  key={minutes}
+                  type="button"
+                  className={preferences.dailyGoal === minutes ? 'settings-choice active' : 'settings-choice'}
+                  onClick={() => updatePreference('dailyGoal', minutes)}
+                >
+                  {minutes} min
+                </button>
+              ))}
+            </div>
           </article>
 
-          <article className="module-card">
+          <article className="settings-card settings-card-danger">
             <span className="module-number">
               PROGRESSION
             </span>

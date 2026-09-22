@@ -4,7 +4,7 @@
 
 :root {
   /* ---------- Couleurs ---------- */
-  --color-bg: #f5f7fb;
+  --color-bg: #f3f6fb;
   --color-surface: #ffffff;
   --color-surface-soft: #f8f9fc;
 
@@ -15,9 +15,10 @@
   --color-border: #e7eaf0;
   --color-border-strong: #d9dee8;
 
-  --color-primary: #3447c7;
-  --color-primary-soft: #eef2ff;
-  --color-primary-dark: #29399f;
+  --color-primary: #4057d6;
+  --color-primary-soft: #edf0ff;
+  --color-primary-dark: #2e43b4;
+  --color-accent: #10a37f;
 
   --color-dark: #172033;
   --color-dark-soft: #252e43;
@@ -50,7 +51,7 @@
     0 4px 12px rgba(23, 32, 51, 0.04);
 
   --shadow-md:
-    0 8px 24px rgba(23, 32, 51, 0.07);
+    0 12px 32px rgba(23, 32, 51, 0.09);
 
   /* ---------- Rayons ---------- */
   --radius-sm: 8px;
@@ -90,7 +91,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background: var(--color-bg);
+  background:
+    radial-gradient(circle at 80% -10%, rgba(64, 87, 214, 0.1), transparent 28rem),
+    var(--color-bg);
   color: var(--color-text);
 }
 
@@ -103,6 +106,12 @@ select {
 
 button {
   margin: 0;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(64, 87, 214, 0.32);
+  outline-offset: 3px;
 }
 
 img,

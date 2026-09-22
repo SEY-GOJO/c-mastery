@@ -38,6 +38,10 @@
   letter-spacing: -0.025em;
 }
 
+.practice-score {
+  background: linear-gradient(145deg, #ffffff, #f1f4ff);
+}
+
 .practice-header p:last-child {
   max-width: 700px;
 
@@ -88,7 +92,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
 
-  background: var(--color-surface);
+  background: linear-gradient(135deg, var(--color-surface), #f8f9ff);
 
   box-shadow: var(--shadow-sm);
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { findLessonById } from './data/course'
 import './LessonPage.css'
 
@@ -586,13 +586,6 @@ export default function CompositeLessonPage({
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
 
-  useEffect(() => {
-    setCurrentStep(0)
-    setSelectedAnswers({})
-    setSubmitted(false)
-    setScore(0)
-  }, [lessonId])
-
   if (!definition || !courseLesson) {
     return (
       <section className="lesson-page">
@@ -835,8 +828,6 @@ export default function CompositeLessonPage({
               {questions.map((question, questionIndex) => {
                 const selected = selectedAnswers[question.id]
                 const isCorrect = selected === question.correct
-                const hasAnswered = Boolean(selected)
-
                 return (
                   <div className="quiz-question" key={question.id}>
                     <div className="quiz-question-header">

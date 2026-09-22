@@ -1323,6 +1323,14 @@ function ControlLessonPage({
 
   const lessonData = findLessonById(lessonId)
 
+  const [currentStep, setCurrentStep] = useState(0)
+
+  const [answers, setAnswers] = useState({})
+
+  const [submitted, setSubmitted] = useState(false)
+
+  const [score, setScore] = useState(0)
+
   if (!definition || !lessonData) {
     return (
       <section className="lesson-shell">
@@ -1351,14 +1359,6 @@ function ControlLessonPage({
       </section>
     )
   }
-
-  const [currentStep, setCurrentStep] = useState(0)
-
-  const [answers, setAnswers] = useState({})
-
-  const [submitted, setSubmitted] = useState(false)
-
-  const [score, setScore] = useState(0)
 
   const totalQuestions =
     definition.questions.length
