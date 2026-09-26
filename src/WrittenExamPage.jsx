@@ -149,6 +149,7 @@ export default function WrittenExamPage({ onBack, onPractice }) {
                   <details className="written-exam-correction">
                     <summary>Afficher une solution possible en C</summary>
                     <pre><code>{exercise.code}</code></pre>
+                    {exercise.compileNote && <p className="written-exam-compile-note">{exercise.compileNote}</p>}
                   </details>
                   <fieldset className="written-exam-rubric">
                     <legend>Barème de l’exercice</legend>

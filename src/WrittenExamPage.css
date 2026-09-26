@@ -125,6 +125,12 @@
   white-space: pre-wrap;
 }
 
+.written-exam-compile-note {
+  margin: 0 1rem 1rem;
+  color: #c9d5ff;
+  font-size: 0.82rem;
+}
+
 .written-exam-rubric {
   display: grid;
   gap: 0.25rem;

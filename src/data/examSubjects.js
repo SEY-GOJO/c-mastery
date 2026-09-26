@@ -151,4 +151,80 @@ export const examSubjects = [
       },
     ],
   },
+  {
+    id: 'bases-entrees-sorties',
+    title: 'Bases et entrées-sorties',
+    exercises: [
+      {
+        id: 'somme-quatre-entiers', title: 'Somme de quatre entiers',
+        statement: 'Écrire un programme en langage C qui lit quatre nombres de type int au clavier, calcule leur somme et l’affiche.',
+        algorithm: `Lire a, b, c, d\nsomme ← a + b + c + d\nAfficher somme`,
+        code: `#include <stdio.h>\n\nint main(void) {\n    int a, b, c, d;\n    printf("Saisir quatre entiers : ");\n    scanf("%d %d %d %d", &a, &b, &c, &d);\n\n    int somme = a + b + c + d;\n    printf("Somme = %d\\n", somme);\n    return 0;\n}`,
+        criteria: [
+          { id: 'sum-input', label: 'Déclarer les quatre entiers et les lire avec scanf.', points: 1 },
+          { id: 'sum-calc', label: 'Additionner les quatre valeurs.', points: 1 },
+          { id: 'sum-print', label: 'Afficher la somme avec le format %d.', points: 2 },
+        ],
+      },
+      {
+        id: 'saisie-age', title: 'Saisir et afficher un âge',
+        statement: 'Écrire un programme en C qui demande l’âge de l’utilisateur, le lit dans une variable de type int, puis affiche par exemple : « Tu as 18 ans. »',
+        algorithm: `Afficher "Quel âge as-tu ?"\nLire age\nAfficher "Tu as", age, "ans."`,
+        code: `#include <stdio.h>\n\nint main(void) {\n    int age;\n    printf("Quel âge as-tu ? ");\n    scanf("%d", &age);\n    printf("Tu as %d ans.\\n", age);\n    return 0;\n}`,
+        criteria: [
+          { id: 'age-input', label: 'Lire un entier avec scanf et transmettre son adresse.', points: 1 },
+          { id: 'age-format', label: 'Afficher l’âge avec %d et un message compréhensible.', points: 1 },
+        ],
+      },
+      {
+        id: 'bonjour', title: 'Afficher un message de bienvenue',
+        statement: 'Écrire un programme complet en C qui affiche le message « Bonjour ! » puis termine correctement.',
+        algorithm: `Début\n    Afficher "Bonjour !"\nFin`,
+        code: `#include <stdio.h>\n\nint main(void) {\n    printf("Bonjour !\\n");\n    return 0;\n}`,
+        criteria: [
+          { id: 'hello-main', label: 'Écrire une fonction main valide et inclure stdio.h.', points: 1 },
+          { id: 'hello-print', label: 'Afficher Bonjour avec printf et terminer le programme.', points: 1 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'geometrie-et-conversions',
+    title: 'Géométrie et conversions',
+    exercises: [
+      {
+        id: 'distance-deux-points', title: 'Distance entre deux points',
+        statement: 'Écrire un programme C qui lit au clavier les coordonnées entières (XA, YA) et (XB, YB) de deux points A et B, calcule la distance DIST de type double et l’affiche. Rappel : DIST = √((XB − XA)² + (YB − YA)²).',
+        algorithm: `Lire XA, YA, XB, YB\ndx ← XB - XA\ndy ← YB - YA\nDIST ← racine_carrée(dx × dx + dy × dy)\nAfficher DIST`,
+        code: `#include <math.h>\n#include <stdio.h>\n\nint main(void) {\n    int xa, ya, xb, yb;\n    printf("Coordonnees de A puis de B : ");\n    scanf("%d %d %d %d", &xa, &ya, &xb, &yb);\n\n    double dx = (double) xb - xa;\n    double dy = (double) yb - ya;\n    double dist = sqrt(dx * dx + dy * dy);\n    printf("DIST = %.2f\\n", dist);\n    return 0;\n}`,
+        compileNote: 'Avec GCC, lie la bibliothèque mathématique : gcc programme.c -o programme -lm.',
+        criteria: [
+          { id: 'dist-input', label: 'Lire les quatre coordonnées entières.', points: 1 },
+          { id: 'dist-delta', label: 'Calculer les écarts dx et dy en double.', points: 1 },
+          { id: 'dist-formula', label: 'Appliquer la racine carrée de dx² + dy².', points: 1 },
+          { id: 'dist-output', label: 'Afficher la distance avec un format décimal.', points: 1 },
+        ],
+      },
+      {
+        id: 'rectangle', title: 'Aire et périmètre d’un rectangle',
+        statement: 'Lire la longueur et la largeur entières d’un rectangle, puis calculer et afficher son aire et son périmètre.',
+        algorithm: `Lire longueur, largeur\naire ← longueur × largeur\nperimetre ← 2 × (longueur + largeur)\nAfficher aire, perimetre`,
+        code: `#include <stdio.h>\n\nint main(void) {\n    int longueur, largeur;\n    scanf("%d %d", &longueur, &largeur);\n\n    int aire = longueur * largeur;\n    int perimetre = 2 * (longueur + largeur);\n    printf("Aire = %d, perimetre = %d\\n", aire, perimetre);\n    return 0;\n}`,
+        criteria: [
+          { id: 'rect-area', label: 'Calculer l’aire comme longueur × largeur.', points: 1 },
+          { id: 'rect-perimeter', label: 'Calculer 2 × (longueur + largeur) et afficher les résultats.', points: 1 },
+        ],
+      },
+      {
+        id: 'conversion-temperature', title: 'Convertir une température',
+        statement: 'Lire une température en degrés Celsius sous forme de double, la convertir en degrés Fahrenheit avec F = C × 9 / 5 + 32, puis afficher le résultat.',
+        algorithm: `Lire C\nF ← C × 9 / 5 + 32\nAfficher F`,
+        code: `#include <stdio.h>\n\nint main(void) {\n    double celsius, fahrenheit;\n    scanf("%lf", &celsius);\n    fahrenheit = celsius * 9.0 / 5.0 + 32.0;\n    printf("F = %.2f\\n", fahrenheit);\n    return 0;\n}`,
+        criteria: [
+          { id: 'temp-format', label: 'Lire une valeur double avec le format %lf.', points: 1 },
+          { id: 'temp-calc', label: 'Appliquer la formule avec une division décimale et afficher le résultat.', points: 1 },
+        ],
+      },
+    ],
+  },
 ]
