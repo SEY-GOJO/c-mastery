@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
 import './PracticePage.css'
+import additionalExercises from './data/additionalExercises'
+import { drawFreshQuestions } from './data/questionSelection'
 
 const exercises = [
   {
@@ -328,20 +330,26 @@ if (f != NULL) {
   },
 ]
 
+exercises.push(...additionalExercises)
+const SESSION_SIZE = 8
+
 function PracticePage({
   onExerciseComplete,
   solvedExercises = [],
 }) {
+  const [session, setSession] = useState(() =>
+    drawFreshQuestions(exercises, [], SESSION_SIZE),
+  )
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [showOnlyUnsolved, setShowOnlyUnsolved] = useState(false)
 
   const visibleExercises = showOnlyUnsolved
-    ? exercises.filter(
+    ? session.questions.filter(
         (exercise) => !solvedExercises.includes(exercise.id),
       )
-    : exercises
+    : session.questions
 
   const currentExercise =
     visibleExercises[currentIndex] || null
@@ -443,6 +451,17 @@ function PracticePage({
     setSubmitted(false)
   }
 
+  const startNewSession = () => {
+    setSession((current) =>
+      drawFreshQuestions(exercises, current.seenIds, SESSION_SIZE),
+    )
+    setCurrentIndex(0)
+    setSubmitted(false)
+    setAnswers({})
+    setShowOnlyUnsolved(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   if (!currentExercise) {
     return (
       <section className="practice-shell">
@@ -455,8 +474,9 @@ function PracticePage({
             </h2>
 
             <p>
-              Tu as répondu correctement à tous les exercices
-              actuellement disponibles.
+              {showOnlyUnsolved
+                ? 'Tous les exercices de cette série ont été réussis.'
+                : 'Cette série est terminée. Une nouvelle série proposera d’autres questions.'}
             </p>
           </div>
         </header>
@@ -482,13 +502,9 @@ function PracticePage({
           <button
             type="button"
             className="practice-primary-button"
-            onClick={() => {
-              setShowOnlyUnsolved(false)
-              setCurrentIndex(0)
-              setSubmitted(false)
-            }}
+            onClick={startNewSession}
           >
-            Refaire l'entraînement
+            Nouvelle série
             <span>→</span>
           </button>
         </section>
@@ -754,6 +770,15 @@ function PracticePage({
         >
           Exercice suivant →
         </button>
+        {submitted && currentIndex === visibleExercises.length - 1 && (
+          <button
+            type="button"
+            className="practice-primary-button"
+            onClick={startNewSession}
+          >
+            Nouvelle série →
+          </button>
+        )}
       </footer>
 
       {/* =====================================================

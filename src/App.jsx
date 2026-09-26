@@ -16,6 +16,8 @@ import { courseModules } from './data/course'
 import ControlLessonPage from './ControlLessonPage'
 import CompositeLessonPage from './CompositeLessonPage'
 import GenericLessonPage from './GenericLessonPage'
+import additionalExamQuestions from './data/additionalExamQuestions'
+import { drawFreshQuestions } from './data/questionSelection'
 
 import './App.css'
 
@@ -372,6 +374,8 @@ printf("%d", age);`,
   },
 ]
 
+examQuestions.push(...additionalExamQuestions)
+
 /* =========================================================
    CLÉS LOCALSTORAGE
    ========================================================= */
@@ -384,6 +388,22 @@ const SOLVED_EXERCISES_KEY =
 
 const PREFERENCES_KEY =
   'c-mastery-preferences'
+
+const saveToLocalStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // L'application reste utilisable si le stockage est désactivé ou saturé.
+  }
+}
+
+const removeFromLocalStorage = (...keys) => {
+  try {
+    keys.forEach((key) => localStorage.removeItem(key))
+  } catch {
+    // La progression reste réinitialisée en mémoire pour cette session.
+  }
+}
 
 /* =========================================================
    APPLICATION
@@ -516,10 +536,7 @@ function App() {
      ======================================================= */
 
   useEffect(() => {
-    localStorage.setItem(
-      COMPLETED_LESSONS_KEY,
-      JSON.stringify(completedLessons),
-    )
+    saveToLocalStorage(COMPLETED_LESSONS_KEY, completedLessons)
   }, [completedLessons])
 
   /* =======================================================
@@ -527,17 +544,11 @@ function App() {
      ======================================================= */
 
   useEffect(() => {
-    localStorage.setItem(
-      SOLVED_EXERCISES_KEY,
-      JSON.stringify(solvedExercises),
-    )
+    saveToLocalStorage(SOLVED_EXERCISES_KEY, solvedExercises)
   }, [solvedExercises])
 
   useEffect(() => {
-    localStorage.setItem(
-      PREFERENCES_KEY,
-      JSON.stringify(preferences),
-    )
+    saveToLocalStorage(PREFERENCES_KEY, preferences)
   }, [preferences])
 
   /* =======================================================
@@ -746,11 +757,8 @@ function App() {
     setCompletedLessons([])
     setSolvedExercises([])
 
-    localStorage.removeItem(
+    removeFromLocalStorage(
       COMPLETED_LESSONS_KEY,
-    )
-
-    localStorage.removeItem(
       SOLVED_EXERCISES_KEY,
     )
 
@@ -1780,6 +1788,7 @@ function ExamPage({
   onBack,
   onPractice,
 }) {
+  const [examSet, setExamSet] = useState({ questions: [], seenIds: [] })
   const [examStarted, setExamStarted] =
     useState(false)
 
@@ -1795,14 +1804,14 @@ function ExamPage({
   const [score, setScore] =
     useState(0)
 
-  const totalQuestions =
-    examQuestions.length
+  const questions = examSet.questions
+  const totalQuestions = 10
 
   const estimatedDuration =
     Math.max(10, totalQuestions * 2)
 
   const currentQuestion =
-    examQuestions[currentQuestionIndex]
+    questions[currentQuestionIndex]
 
   const currentAnswer =
     currentQuestion
@@ -1810,6 +1819,9 @@ function ExamPage({
       : null
 
   const startExam = () => {
+    setExamSet((current) =>
+      drawFreshQuestions(examQuestions, current.seenIds, totalQuestions),
+    )
     setExamStarted(true)
     setCurrentQuestionIndex(0)
     setAnswers({})
@@ -1843,7 +1855,7 @@ function ExamPage({
     }
 
     const calculatedScore =
-      examQuestions.reduce(
+      questions.reduce(
         (total, question) => {
           return (
             total +
@@ -1989,7 +2001,7 @@ function ExamPage({
             </div>
           </div>
 
-          {examQuestions.map(
+          {questions.map(
             (question, index) => {
               const selected =
                 answers[question.id]
