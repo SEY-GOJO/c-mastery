@@ -1231,7 +1231,7 @@ function LearnPage({
           </div>
         </div>
 
-        <div className="module-grid">
+        <div className="course-module-grid">
           {courseModules.map(
             (module) => {
               const unlocked =
@@ -1254,6 +1254,9 @@ function LearnPage({
                       lesson.id,
                     ),
                 ).length
+              const moduleProgress = implementedLessons.length
+                ? Math.round((completedModuleLessons / implementedLessons.length) * 100)
+                : 0
 
               let moduleStatus =
                 '🔒 Verrouillé'
@@ -1274,57 +1277,42 @@ function LearnPage({
               return (
                 <article
                   key={module.id}
-                  className={`module-card ${
+                  className={`course-module-card ${
                     !unlocked
                       ? 'module-card-disabled'
                       : ''
                   }`}
                 >
-                  <span className="module-number">
-                    MODULE{' '}
-                    {module.number}
-                  </span>
+                  <div className="course-module-banner">
+                    <span className="course-module-symbol">{module.number}</span>
+                    <div className="course-module-heading">
+                      <span className="course-module-number">MODULE {module.number}</span>
+                      <h4>{module.title}</h4>
+                    </div>
+                    <span className={`course-module-status ${unlocked ? 'available' : 'locked'}`}>
+                      {moduleStatus}
+                    </span>
+                  </div>
 
-                  <h4>
-                    {module.title}
-                  </h4>
+                  <div className="course-module-explanation">
+                    <span className="course-explanation-label">CE QUE TU VAS APPRENDRE</span>
+                    <p>{module.description}</p>
+                  </div>
 
-                  <p>
-                    {module.description}
-                  </p>
-
-                  <span
-                    className={
-                      unlocked
-                        ? 'module-status available'
-                        : 'module-status locked'
-                    }
-                  >
-                    {moduleStatus}
-                  </span>
-
-                  <p
-                    style={{
-                      marginTop:
-                        '0.75rem',
-                      fontSize:
-                        '0.85rem',
-                    }}
-                  >
-                    {implementedLessons.length >
-                    0
-                      ? `${completedModuleLessons}/${implementedLessons.length} leçons développées`
-                      : 'Contenu en préparation'}
-                  </p>
+                  <div className="course-module-progress">
+                    <div className="course-module-progress-label">
+                      <span>TA PROGRESSION</span>
+                      <strong>{implementedLessons.length ? `${completedModuleLessons}/${implementedLessons.length} leçons terminées` : 'Aucune leçon disponible pour le moment'}</strong>
+                    </div>
+                    <div className="course-module-progress-track" role="progressbar" aria-label={`Progression du module ${module.title}`} aria-valuenow={moduleProgress} aria-valuemin="0" aria-valuemax="100">
+                      <span style={{ width: `${moduleProgress}%` }} />
+                    </div>
+                  </div>
 
                   {module.lessons
                     .length > 0 && (
                     <div
-                      className="module-grid"
-                      style={{
-                        marginTop:
-                          '1rem',
-                      }}
+                      className="course-lesson-grid"
                     >
                       {module.lessons.map(
                         (lesson) => {
@@ -1373,7 +1361,7 @@ function LearnPage({
                                 lesson.id
                               }
                               type="button"
-                              className={`module-card ${
+                              className={`course-lesson-card ${
                                 disabled
                                   ? 'module-card-disabled'
                                   : ''
@@ -1387,38 +1375,24 @@ function LearnPage({
                                 )
                               }
                             >
-                              <span className="module-number">
-                                LEÇON{' '}
-                                {
-                                  lesson.number
-                                }
-                              </span>
-
-                              <h4>
-                                {
-                                  lesson.title
-                                }
-                              </h4>
-
-                              <p>
-                                {lesson.topics
-                                  .slice(
-                                    0,
-                                    2,
-                                  )
-                                  .join(
-                                    ' • ',
-                                  )}
-                              </p>
+                              <div className="course-lesson-heading">
+                                <span className="course-lesson-number">LEÇON {lesson.number}</span>
+                                <span className="course-lesson-symbol" aria-hidden="true">C</span>
+                              </div>
+                              <h4>{lesson.title}</h4>
+                              <span className="course-explanation-label">NOTIONS CLÉS</span>
+                              <div className="course-topic-list">
+                                {lesson.topics.slice(0, 2).map((topic) => <span key={topic}>{topic}</span>)}
+                              </div>
 
                               <span
-                                className={
+                                className={`course-lesson-status ${
                                   completed ||
                                   (unlockedLesson &&
                                     implemented)
-                                    ? 'module-status available'
-                                    : 'module-status locked'
-                                }
+                                    ? 'available'
+                                    : 'locked'
+                                }`}
                               >
                                 {
                                   lessonStatus

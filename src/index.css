@@ -4,24 +4,24 @@
 
 :root {
   /* ---------- Couleurs ---------- */
-  --color-bg: #f3f6fb;
+  --color-bg: #f1f5fb;
   --color-surface: #ffffff;
   --color-surface-soft: #f8f9fc;
 
-  --color-text: #172033;
-  --color-text-secondary: #626c7d;
-  --color-text-muted: #8a93a3;
+  --color-text: #101828;
+  --color-text-secondary: #344054;
+  --color-text-muted: #536176;
 
-  --color-border: #e7eaf0;
-  --color-border-strong: #d9dee8;
+  --color-border: #dce3ee;
+  --color-border-strong: #bcc9dc;
 
-  --color-primary: #4057d6;
-  --color-primary-soft: #edf0ff;
-  --color-primary-dark: #2e43b4;
+  --color-primary: #2456c5;
+  --color-primary-soft: #e8efff;
+  --color-primary-dark: #173b91;
   --color-accent: #10a37f;
 
-  --color-dark: #172033;
-  --color-dark-soft: #252e43;
+  --color-dark: #111c35;
+  --color-dark-soft: #1b2b4b;
 
   --color-success: #1f8f61;
   --color-success-soft: #eaf8f1;

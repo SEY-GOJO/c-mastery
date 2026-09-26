@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@live-codes/clang-wasm": "^0.3.0",
+    "@omni-wasm/c": "^1.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

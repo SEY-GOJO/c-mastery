@@ -5,7 +5,7 @@ export const examSubjects = [
     exercises: [
       {
         id: 'factoriel', title: 'Calcul du factoriel',
-        statement: 'Soit n un entier donné avec n > 0. Écrire un algorithme, puis un programme en langage C, qui calcule et affiche n! sachant que n! = 1 × 2 × 3 × … × n. On suppose que le résultat tient dans un long long.',
+        statement: 'Soit n un entier donné avec n > 0. Écrire un programme en langage C qui calcule et affiche n! sachant que n! = 1 × 2 × 3 × … × n. On suppose que le résultat tient dans un long long.',
         algorithm: `Lire n\nfactoriel ← 1\nPour i allant de 1 à n\n    factoriel ← factoriel × i\nFinPour\nAfficher factoriel`,
         code: `#include <stdio.h>\n\nint main(void) {\n    int n;\n    long long factoriel = 1;\n    scanf("%d", &n);\n\n    for (int i = 1; i <= n; i++) {\n        factoriel *= i;\n    }\n\n    printf("%d! = %lld\\n", n, factoriel);\n    return 0;\n}`,
         criteria: [
@@ -16,7 +16,7 @@ export const examSubjects = [
       },
       {
         id: 'somme-factoriels', title: 'Somme des factoriels',
-        statement: 'Soit n un entier donné avec n > 0. Écrire un algorithme, puis un programme en C, qui calcule et affiche S = 1! + 2! + 3! + … + n!. On suppose que le résultat tient dans un long long.',
+        statement: 'Soit n un entier donné avec n > 0. Écrire un programme en C qui calcule et affiche S = 1! + 2! + 3! + … + n!. On suppose que le résultat tient dans un long long.',
         algorithm: `Lire n\nfactoriel ← 1\nsomme ← 0\nPour i allant de 1 à n\n    factoriel ← factoriel × i\n    somme ← somme + factoriel\nFinPour\nAfficher somme`,
         code: `#include <stdio.h>\n\nint main(void) {\n    int n;\n    long long factoriel = 1, somme = 0;\n    scanf("%d", &n);\n\n    for (int i = 1; i <= n; i++) {\n        factoriel *= i;\n        somme += factoriel;\n    }\n\n    printf("S = %lld\\n", somme);\n    return 0;\n}`,
         criteria: [
@@ -27,7 +27,7 @@ export const examSubjects = [
       },
       {
         id: 'somme-impairs-3', title: 'Impairs multiples de 3',
-        statement: 'Soient m et n deux entiers donnés tels que m < n. Écrire un algorithme, puis un programme en C, qui calcule et affiche la somme des nombres de [m, n] qui sont à la fois impairs et multiples de 3.',
+        statement: 'Soient m et n deux entiers donnés tels que m < n. Écrire un programme en C qui calcule et affiche la somme des nombres de [m, n] qui sont à la fois impairs et multiples de 3.',
         algorithm: `Lire m, n\nsomme ← 0\nPour i allant de m à n\n    Si i mod 2 ≠ 0 ET i mod 3 = 0 alors\n        somme ← somme + i\n    FinSi\nFinPour\nAfficher somme`,
         code: `#include <stdio.h>\n\nint main(void) {\n    int m, n, somme = 0;\n    scanf("%d %d", &m, &n);\n\n    for (int i = m; i <= n; i++) {\n        if (i % 2 != 0 && i % 3 == 0) {\n            somme += i;\n        }\n    }\n\n    printf("Somme = %d\\n", somme);\n    return 0;\n}`,
         criteria: [
