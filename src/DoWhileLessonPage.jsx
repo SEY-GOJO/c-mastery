@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getPassingScore, shuffleQuestions } from './data/questionSelection'
 
 import { findLessonById } from './data/course'
 
@@ -267,10 +268,12 @@ function DoWhileLessonPage({
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
+  const [assessmentQuestions, setAssessmentQuestions] = useState(() => shuffleQuestions(questions))
 
   const lessonData = findLessonById('do-while')
 
-  const totalQuestions = questions.length
+  const totalQuestions = assessmentQuestions.length
+  const passingScore = getPassingScore(totalQuestions)
 
   const progressPercentage =
     ((currentStep + 1) / steps.length) * 100
@@ -289,7 +292,7 @@ function DoWhileLessonPage({
   const submitExercise = () => {
     let calculatedScore = 0
 
-    questions.forEach((question) => {
+    assessmentQuestions.forEach((question) => {
       if (answers[question.id] === question.correct) {
         calculatedScore += 1
       }
@@ -298,7 +301,7 @@ function DoWhileLessonPage({
     setScore(calculatedScore)
     setSubmitted(true)
 
-    if (calculatedScore === totalQuestions) {
+    if (calculatedScore >= passingScore) {
       onComplete('do-while')
     }
   }
@@ -307,6 +310,7 @@ function DoWhileLessonPage({
     setAnswers({})
     setSubmitted(false)
     setScore(0)
+    setAssessmentQuestions(shuffleQuestions(questions))
   }
 
   const goToNextStep = () => {
@@ -1144,13 +1148,13 @@ do {
             <p className="lesson-introduction">
               Pour valider la leçon, il faut obtenir{' '}
               <strong>
-                {totalQuestions}/{totalQuestions}
+                {passingScore}/{totalQuestions}
               </strong>
               .
             </p>
           </section>
 
-          {questions.map((question, index) => {
+          {assessmentQuestions.map((question, index) => {
             const selectedAnswer = answers[question.id]
 
             const isCorrect =
@@ -1261,19 +1265,19 @@ do {
 
               <div>
                 <strong>
-                  {score === totalQuestions
+                  {score >= passingScore
                     ? 'Maîtrise validée.'
                     : 'La maîtrise n’est pas encore validée.'}
                 </strong>
 
                 <p>
-                  {score === totalQuestions
+                  {score >= passingScore
                     ? 'Tu peux maintenant passer à la validation de la leçon.'
                     : 'Relis la structure de do...while, notamment le fait que le bloc est exécuté avant le test de la condition, puis recommence.'}
                 </p>
               </div>
 
-              {score < totalQuestions && (
+              {score < passingScore && (
                 <button
                   type="button"
                   className="lesson-secondary-button"
@@ -1295,7 +1299,7 @@ do {
           <section className="lesson-completion-card">
             <div className="lesson-completion-icon">
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? '✓'
                 : '🎯'}
             </div>
@@ -1306,16 +1310,16 @@ do {
 
             <h3>
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? 'Boucle do...while maîtrisée.'
                 : 'Tu es arrivé à la fin de la leçon.'}
             </h3>
 
             <p>
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? 'Tu sais maintenant reconnaître la structure d’une boucle do...while, suivre ses itérations, mettre à jour les variables et déterminer la condition d’arrêt sans compiler.'
-                : `Pour valider cette leçon, reprends les exercices et obtiens ${totalQuestions}/${totalQuestions}.`}
+                : `Pour valider cette leçon, obtiens au moins ${passingScore}/${totalQuestions}.`}
             </p>
 
             <div className="lesson-summary">
@@ -1351,7 +1355,7 @@ do {
             </div>
 
             {alreadyCompleted ||
-            score === totalQuestions ? (
+            score >= passingScore ? (
               <button
                 type="button"
                 className="lesson-primary-button"
@@ -1393,7 +1397,7 @@ do {
             onClick={goToNextStep}
             disabled={
               currentStep === 3 &&
-              score !== totalQuestions &&
+              score < passingScore &&
               !alreadyCompleted
             }
           >

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getPassingScore, shuffleQuestions } from './data/questionSelection'
 
 import { findLessonById } from './data/course'
 
@@ -256,11 +257,13 @@ function PrintfScanfLessonPage({
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
+  const [assessmentQuestions, setAssessmentQuestions] = useState(() => shuffleQuestions(questions))
 
   const lessonData =
     findLessonById('printf-scanf')
 
-  const totalQuestions = questions.length
+  const totalQuestions = assessmentQuestions.length
+  const passingScore = getPassingScore(totalQuestions)
 
   const progressPercentage =
     ((currentStep + 1) / steps.length) * 100
@@ -282,7 +285,7 @@ function PrintfScanfLessonPage({
   const submitExercise = () => {
     let calculatedScore = 0
 
-    questions.forEach((question) => {
+    assessmentQuestions.forEach((question) => {
       if (
         answers[question.id] ===
         question.correct
@@ -295,7 +298,7 @@ function PrintfScanfLessonPage({
     setSubmitted(true)
 
     if (
-      calculatedScore === totalQuestions
+      calculatedScore >= passingScore
     ) {
       onComplete('printf-scanf')
     }
@@ -305,6 +308,7 @@ function PrintfScanfLessonPage({
     setAnswers({})
     setSubmitted(false)
     setScore(0)
+    setAssessmentQuestions(shuffleQuestions(questions))
   }
 
   const goToNextStep = () => {
@@ -1187,15 +1191,14 @@ printf("%d", x - y);`}</code>
               Pour valider cette leçon, tu dois
               obtenir{' '}
               <strong>
-                {totalQuestions}/
+                {passingScore}/
                 {totalQuestions}
               </strong>
-              . Une seule réponse incorrecte impose
-              une nouvelle tentative.
+              . Tu peux faire quelques erreurs et valider quand même.
             </p>
           </section>
 
-          {questions.map(
+          {assessmentQuestions.map(
             (question, index) => {
               const selectedAnswer =
                 answers[question.id]
@@ -1323,21 +1326,21 @@ printf("%d", x - y);`}</code>
               <div>
                 <strong>
                   {score ===
-                  totalQuestions
+                  passingScore
                     ? 'Maîtrise validée.'
                     : 'La maîtrise n’est pas encore validée.'}
                 </strong>
 
                 <p>
                   {score ===
-                  totalQuestions
+                  passingScore
                     ? 'Tu peux maintenant poursuivre vers les instructions de contrôle.'
-                    : 'Relis les notions, vérifie particulièrement les formats et le rôle de & avec scanf, puis recommence.'}
+                    : `Relis les notions, notamment les formats et l’adresse avec scanf, puis vise ${passingScore}/${totalQuestions}.`}
                 </p>
               </div>
 
               {score <
-                totalQuestions && (
+                passingScore && (
                 <button
                   type="button"
                   className="lesson-secondary-button"
@@ -1362,7 +1365,7 @@ printf("%d", x - y);`}</code>
           <section className="lesson-completion-card">
             <div className="lesson-completion-icon">
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? '✓'
                 : '🎯'}
             </div>
@@ -1373,16 +1376,16 @@ printf("%d", x - y);`}</code>
 
             <h3>
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? 'printf et scanf maîtrisés.'
                 : 'Tu es arrivé à la fin de la leçon.'}
             </h3>
 
             <p>
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? 'Tu sais maintenant afficher des informations, lire des données au clavier, reconnaître les principaux formats et distinguer une valeur d’une adresse.'
-                : `Pour valider cette leçon, reprends les exercices et obtiens ${totalQuestions}/${totalQuestions}.`}
+                : `Pour valider cette leçon, obtiens au moins ${passingScore}/${totalQuestions}.`}
             </p>
 
             <div className="lesson-summary">
@@ -1420,7 +1423,7 @@ printf("%d", x - y);`}</code>
             </div>
 
             {alreadyCompleted ||
-            score === totalQuestions ? (
+            score >= passingScore ? (
               <button
                 type="button"
                 className="lesson-primary-button"
@@ -1466,7 +1469,7 @@ printf("%d", x - y);`}</code>
             onClick={goToNextStep}
             disabled={
               currentStep === 3 &&
-              score !== totalQuestions &&
+              score < passingScore &&
               !alreadyCompleted
             }
           >

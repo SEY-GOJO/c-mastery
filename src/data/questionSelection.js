@@ -27,3 +27,16 @@ export function drawFreshQuestions(pool, seenIds = [], count = 10) {
 
   return { questions, seenIds: [...nextSeenIds] }
 }
+
+export function shuffleQuestions(questions) {
+  const result = [...questions]
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const otherIndex = Math.floor(Math.random() * (index + 1))
+    ;[result[index], result[otherIndex]] = [result[otherIndex], result[index]]
+  }
+  return result
+}
+
+export function getPassingScore(totalQuestions) {
+  return Math.ceil(totalQuestions * 0.75)
+}

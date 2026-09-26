@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getPassingScore, shuffleQuestions } from './data/questionSelection'
 
 import { findLessonById } from './data/course'
 
@@ -1330,6 +1331,9 @@ function ControlLessonPage({
   const [submitted, setSubmitted] = useState(false)
 
   const [score, setScore] = useState(0)
+  const [assessmentQuestions, setAssessmentQuestions] = useState(() =>
+    shuffleQuestions(definition?.questions || []),
+  )
 
   if (!definition || !lessonData) {
     return (
@@ -1361,7 +1365,8 @@ function ControlLessonPage({
   }
 
   const totalQuestions =
-    definition.questions.length
+    assessmentQuestions.length
+  const passingScore = getPassingScore(totalQuestions)
 
   const progressPercentage =
     ((currentStep + 1) /
@@ -1385,7 +1390,7 @@ function ControlLessonPage({
   const submitExercise = () => {
     let calculatedScore = 0
 
-    definition.questions.forEach(
+    assessmentQuestions.forEach(
       (question) => {
         if (
           answers[question.id] ===
@@ -1400,8 +1405,7 @@ function ControlLessonPage({
     setSubmitted(true)
 
     if (
-      calculatedScore ===
-      totalQuestions
+      calculatedScore >= passingScore
     ) {
       onComplete(lessonId)
     }
@@ -1411,6 +1415,7 @@ function ControlLessonPage({
     setAnswers({})
     setSubmitted(false)
     setScore(0)
+    setAssessmentQuestions(shuffleQuestions(definition.questions))
   }
 
   const goToNextStep = () => {
@@ -1931,13 +1936,13 @@ function ControlLessonPage({
             <p className="lesson-introduction">
               Pour valider cette leçon, il faut obtenir{' '}
               <strong>
-                {totalQuestions}/{totalQuestions}
+                {passingScore}/{totalQuestions}
               </strong>
               .
             </p>
           </section>
 
-          {definition.questions.map(
+          {assessmentQuestions.map(
             (question, index) => {
               const selectedAnswer =
                 answers[question.id]
@@ -2074,7 +2079,7 @@ function ControlLessonPage({
                   {score ===
                   totalQuestions
                     ? 'Tu peux maintenant passer à la validation de la leçon.'
-                    : 'Relis les notions puis recommence jusqu’à obtenir le score complet.'}
+                    : `Relis les notions puis vise au moins ${passingScore}/${totalQuestions}.`}
                 </p>
               </div>
 
@@ -2100,7 +2105,7 @@ function ControlLessonPage({
           <section className="lesson-completion-card">
             <div className="lesson-completion-icon">
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? '✓'
                 : '🎯'}
             </div>
@@ -2111,16 +2116,16 @@ function ControlLessonPage({
 
             <h3>
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? `${lessonData.title} maîtrisé.`
                 : 'Tu es arrivé à la fin de la leçon.'}
             </h3>
 
             <p>
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? 'Tu sais maintenant reconnaître cette structure de contrôle, suivre son fonctionnement et déterminer son résultat sans compiler.'
-                : `Pour valider cette leçon, reprends les exercices et obtiens ${totalQuestions}/${totalQuestions}.`}
+                : `Pour valider cette leçon, obtiens au moins ${passingScore}/${totalQuestions}.`}
             </p>
 
             <div className="lesson-summary">
@@ -2156,7 +2161,7 @@ function ControlLessonPage({
             </div>
 
             {alreadyCompleted ||
-            score === totalQuestions ? (
+            score >= passingScore ? (
               <button
                 type="button"
                 className="lesson-primary-button"
@@ -2206,7 +2211,7 @@ function ControlLessonPage({
             }
             disabled={
               currentStep === 3 &&
-              score !== totalQuestions &&
+              score < passingScore &&
               !alreadyCompleted
             }
           >

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getPassingScore, shuffleQuestions } from './data/questionSelection'
 
 import { findLessonById } from './data/course'
 
@@ -228,10 +229,12 @@ function VariablesLessonPage({
   const [submitted, setSubmitted] = useState(false)
 
   const [score, setScore] = useState(0)
+  const [assessmentQuestions, setAssessmentQuestions] = useState(() => shuffleQuestions(questions))
 
   const lessonData = findLessonById('variables-types')
 
-  const totalQuestions = questions.length
+  const totalQuestions = assessmentQuestions.length
+  const passingScore = getPassingScore(totalQuestions)
 
   const progressPercentage =
     ((currentStep + 1) / steps.length) * 100
@@ -250,7 +253,7 @@ function VariablesLessonPage({
   const submitExercise = () => {
     let calculatedScore = 0
 
-    questions.forEach((question) => {
+    assessmentQuestions.forEach((question) => {
       if (answers[question.id] === question.correct) {
         calculatedScore += 1
       }
@@ -260,7 +263,7 @@ function VariablesLessonPage({
 
     setSubmitted(true)
 
-    if (calculatedScore === totalQuestions) {
+    if (calculatedScore >= passingScore) {
       onComplete('variables-types')
     }
   }
@@ -269,6 +272,7 @@ function VariablesLessonPage({
     setAnswers({})
     setSubmitted(false)
     setScore(0)
+    setAssessmentQuestions(shuffleQuestions(questions))
   }
 
   const goToNextStep = () => {
@@ -1150,13 +1154,13 @@ a = a + 4;`}</code>
             <p className="lesson-introduction">
               Pour valider cette leçon, il faut obtenir{' '}
               <strong>
-                {totalQuestions}/{totalQuestions}
+                {passingScore}/{totalQuestions}
               </strong>
-              . Cela impose une maîtrise complète de ces bases.
+              . Il faut atteindre ce seuil pour valider la leçon.
             </p>
           </section>
 
-          {questions.map((question, index) => {
+          {assessmentQuestions.map((question, index) => {
             const selectedAnswer = answers[question.id]
 
             const isCorrect =
@@ -1271,19 +1275,19 @@ a = a + 4;`}</code>
 
               <div>
                 <strong>
-                  {score === totalQuestions
+                  {score >= passingScore
                     ? 'Maîtrise validée.'
                     : 'La maîtrise n’est pas encore validée.'}
                 </strong>
 
                 <p>
-                  {score === totalQuestions
+                  {score >= passingScore
                     ? 'Tu peux passer à la validation de la leçon.'
-                    : 'Relis les notions, puis recommence jusqu’à obtenir le score complet.'}
+                    : `Relis les notions et vise au moins ${passingScore}/${totalQuestions}.`}
                 </p>
               </div>
 
-              {score < totalQuestions && (
+              {score < passingScore && (
                 <button
                   type="button"
                   className="lesson-secondary-button"
@@ -1305,7 +1309,7 @@ a = a + 4;`}</code>
           <section className="lesson-completion-card">
             <div className="lesson-completion-icon">
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? '✓'
                 : '🎯'}
             </div>
@@ -1316,16 +1320,16 @@ a = a + 4;`}</code>
 
             <h3>
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? 'Variables, types et formats maîtrisés.'
                 : 'Tu es arrivé à la fin de la leçon.'}
             </h3>
 
             <p>
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? 'Tu sais maintenant déclarer les principales variables, reconnaître leurs types, utiliser les principaux formats et suivre leur valeur lorsqu’un programme les modifie.'
-                : `Pour valider cette leçon, reprends les exercices et obtiens ${totalQuestions}/${totalQuestions}.`}
+                : `Pour valider cette leçon, obtiens au moins ${passingScore}/${totalQuestions}.`}
             </p>
 
             <div className="lesson-summary">
@@ -1361,7 +1365,7 @@ a = a + 4;`}</code>
             </div>
 
             {alreadyCompleted ||
-            score === totalQuestions ? (
+            score >= passingScore ? (
               <button
                 type="button"
                 className="lesson-primary-button"
@@ -1405,7 +1409,7 @@ a = a + 4;`}</code>
             onClick={goToNextStep}
             disabled={
               currentStep === 3 &&
-              score !== totalQuestions &&
+              score < passingScore &&
               !alreadyCompleted
             }
           >

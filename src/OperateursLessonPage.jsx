@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getPassingScore, shuffleQuestions } from './data/questionSelection'
 
 import { findLessonById } from './data/course'
 
@@ -255,10 +256,12 @@ function OperateursLessonPage({
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
+  const [assessmentQuestions, setAssessmentQuestions] = useState(() => shuffleQuestions(questions))
 
   const lessonData = findLessonById('operateurs')
 
-  const totalQuestions = questions.length
+  const totalQuestions = assessmentQuestions.length
+  const passingScore = getPassingScore(totalQuestions)
 
   const progressPercentage =
     ((currentStep + 1) / steps.length) * 100
@@ -277,7 +280,7 @@ function OperateursLessonPage({
   const submitExercise = () => {
     let calculatedScore = 0
 
-    questions.forEach((question) => {
+    assessmentQuestions.forEach((question) => {
       if (
         answers[question.id] ===
         question.correct
@@ -289,7 +292,7 @@ function OperateursLessonPage({
     setScore(calculatedScore)
     setSubmitted(true)
 
-    if (calculatedScore === totalQuestions) {
+    if (calculatedScore >= passingScore) {
       onComplete('operateurs')
     }
   }
@@ -298,6 +301,7 @@ function OperateursLessonPage({
     setAnswers({})
     setSubmitted(false)
     setScore(0)
+    setAssessmentQuestions(shuffleQuestions(questions))
   }
 
   const goToNextStep = () => {
@@ -1204,14 +1208,14 @@ age >= 18 && age <= 25`}</code>
               opérateurs. Pour valider la leçon,
               tu dois obtenir{' '}
               <strong>
-                {totalQuestions}/
+                {passingScore}/
                 {totalQuestions}
               </strong>
               .
             </p>
           </section>
 
-          {questions.map(
+          {assessmentQuestions.map(
             (question, index) => {
               const selectedAnswer =
                 answers[question.id]
@@ -1334,19 +1338,19 @@ age >= 18 && age <= 25`}</code>
 
               <div>
                 <strong>
-                  {score === totalQuestions
+                  {score >= passingScore
                     ? 'Maîtrise validée.'
                     : 'La maîtrise n’est pas encore validée.'}
                 </strong>
 
                 <p>
-                  {score === totalQuestions
+                  {score >= passingScore
                     ? 'Les opérateurs fondamentaux sont maintenant validés. Tu peux passer à la validation de la leçon.'
-                    : 'Relis les notions et recommence jusqu’à obtenir le score complet.'}
+                    : `Relis les notions et vise au moins ${passingScore}/${totalQuestions}.`}
                 </p>
               </div>
 
-              {score < totalQuestions && (
+              {score < passingScore && (
                 <button
                   type="button"
                   className="lesson-secondary-button"
@@ -1369,7 +1373,7 @@ age >= 18 && age <= 25`}</code>
           <section className="lesson-completion-card">
             <div className="lesson-completion-icon">
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? '✓'
                 : '🎯'}
             </div>
@@ -1380,16 +1384,16 @@ age >= 18 && age <= 25`}</code>
 
             <h3>
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? 'Les opérateurs sont maîtrisés.'
                 : 'Tu es arrivé à la fin de la leçon.'}
             </h3>
 
             <p>
               {alreadyCompleted ||
-              score === totalQuestions
+              score >= passingScore
                 ? 'Tu sais maintenant utiliser les principaux opérateurs arithmétiques, relationnels et logiques et raisonner sur leurs expressions sans compiler.'
-                : `Pour valider cette leçon, reprends les exercices et obtiens ${totalQuestions}/${totalQuestions}.`}
+                : `Pour valider cette leçon, obtiens au moins ${passingScore}/${totalQuestions}.`}
             </p>
 
             <div className="lesson-summary">
@@ -1427,7 +1431,7 @@ age >= 18 && age <= 25`}</code>
             </div>
 
             {alreadyCompleted ||
-            score === totalQuestions ? (
+            score >= passingScore ? (
               <button
                 type="button"
                 className="lesson-primary-button"
@@ -1473,7 +1477,7 @@ age >= 18 && age <= 25`}</code>
             onClick={goToNextStep}
             disabled={
               currentStep === 3 &&
-              score !== totalQuestions &&
+              score < passingScore &&
               !alreadyCompleted
             }
           >

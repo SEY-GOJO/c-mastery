@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getPassingScore, shuffleQuestions } from './data/questionSelection'
 import { findLessonById } from './data/course'
 import './LessonPage.css'
 
@@ -585,6 +586,9 @@ export default function CompositeLessonPage({
   const [selectedAnswers, setSelectedAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
+  const [assessmentQuestions, setAssessmentQuestions] = useState(() =>
+    shuffleQuestions(definition?.questions || []),
+  )
 
   if (!definition || !courseLesson) {
     return (
@@ -604,9 +608,10 @@ export default function CompositeLessonPage({
     )
   }
 
-  const questions = definition.questions
+  const questions = assessmentQuestions
   const totalQuestions = questions.length
-  const isPerfectScore = submitted && score === totalQuestions
+  const passingScore = getPassingScore(totalQuestions)
+  const isPerfectScore = submitted && score >= passingScore
 
   const steps = [
     { label: 'Objectif', icon: '🎯' },
@@ -639,7 +644,7 @@ export default function CompositeLessonPage({
     setScore(newScore)
     setSubmitted(true)
 
-    if (newScore === totalQuestions) {
+    if (newScore >= passingScore) {
       onComplete(lessonId)
     }
   }
@@ -648,6 +653,7 @@ export default function CompositeLessonPage({
     setSelectedAnswers({})
     setSubmitted(false)
     setScore(0)
+    setAssessmentQuestions(shuffleQuestions(definition.questions))
   }
 
   const goToPreviousStep = () => {
@@ -655,7 +661,7 @@ export default function CompositeLessonPage({
   }
 
   const goToNextStep = () => {
-    if (currentStep === 3 && score !== totalQuestions && !alreadyCompleted) {
+    if (currentStep === 3 && score < passingScore && !alreadyCompleted) {
       return
     }
 
@@ -696,7 +702,7 @@ export default function CompositeLessonPage({
               if (
                 index > currentStep &&
                 currentStep === 3 &&
-                score !== totalQuestions &&
+                score < passingScore &&
                 !alreadyCompleted
               ) {
                 return
@@ -821,7 +827,7 @@ export default function CompositeLessonPage({
 
             <p className="lesson-intro">
               Réponds aux {totalQuestions} questions. Pour valider la leçon,
-              tu dois obtenir {totalQuestions}/{totalQuestions}.
+              tu dois obtenir au moins {passingScore}/{totalQuestions}.
             </p>
 
             <div className="quiz-list">
@@ -909,7 +915,7 @@ export default function CompositeLessonPage({
                   <p>
                     {isPerfectScore
                       ? 'Excellent. La leçon est validée.'
-                      : `Tu dois obtenir ${totalQuestions}/${totalQuestions} pour valider cette leçon.`}
+                      : `Tu dois obtenir au moins ${passingScore}/${totalQuestions} pour valider cette leçon.`}
                   </p>
 
                   {!isPerfectScore && (
@@ -944,7 +950,7 @@ export default function CompositeLessonPage({
               <p>
                 {alreadyCompleted || isPerfectScore
                   ? `Tu maîtrises maintenant les bases de ${definition.title.toLowerCase()}.`
-                  : `Obtiens ${totalQuestions}/${totalQuestions} à l’exercice pour débloquer la validation.`}
+                  : `Obtiens au moins ${passingScore}/${totalQuestions} à l’exercice pour débloquer la validation.`}
               </p>
 
               <div className="validation-score">
@@ -983,7 +989,7 @@ export default function CompositeLessonPage({
           disabled={
             currentStep === 4 ||
             (currentStep === 3 &&
-              score !== totalQuestions &&
+              score < passingScore &&
               !alreadyCompleted)
           }
         >
